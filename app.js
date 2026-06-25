@@ -20,6 +20,7 @@ const els = {
   planRoute: document.getElementById('planRoute'),
   clearSel: document.getElementById('clearSel'),
   routeStatus: document.getElementById('routeStatus'),
+  routeLink: document.getElementById('routeLink'),
 };
 
 fetch('stations.json').then(r => r.json()).then(data => {
@@ -192,7 +193,11 @@ function updateMultiPanel() {
     els.chips.appendChild(chip);
   }
   els.multiPanel.style.display = selected.size >= 1 ? 'block' : 'none';
-  els.routeStatus.textContent = '';
+  els.planRoute.disabled = selected.size < 2;
+  els.routeStatus.textContent = selected.size === 1
+    ? 'Select at least one more station to plan a multi-stop route.'
+    : '';
+  els.routeLink.style.display = 'none';
 }
 
 els.search.addEventListener('input', () => render(els.search.value));
@@ -204,7 +209,11 @@ els.clearSel.addEventListener('click', () => {
 });
 
 els.planRoute.addEventListener('click', async () => {
-  if (selected.size === 0) return;
+  if (selected.size < 2) {
+    els.routeStatus.textContent = 'Select at least 2 stations to plan a route.';
+    return;
+  }
+  els.routeLink.style.display = 'none';
   els.routeStatus.textContent = 'Getting your location...';
   let loc;
   try {
@@ -229,6 +238,13 @@ els.planRoute.addEventListener('click', async () => {
 
   const q = addrParts.map(encodeURIComponent).join('$');
   const url = `https://www.routexl.com/?q=${q}&lang=en`;
+
   els.routeStatus.textContent = `Start: your location → ${rest.length} stop(s) → Farthest: ${farthest.name}`;
-  window.open(url, '_blank');
+  els.routeLink.href = url;
+  els.routeLink.style.display = 'block';
+
+  const opened = window.open(url, '_blank');
+  if (!opened) {
+    els.routeStatus.textContent += ' (Tap the button below to open — your browser blocked the automatic popup.)';
+  }
 });
