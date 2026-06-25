@@ -1,9 +1,14 @@
+const SHEET_ID = '1CUlxoca4L0dj2XDAa7X5iRBHDQyzDfDG';
+const SHEET_NAME = 'All';
+
 let STATIONS = [];
 let selected = new Map(); // id -> station
 
 const els = {
   search: document.getElementById('search'),
   results: document.getElementById('results'),
+  refreshBtn: document.getElementById('refreshBtn'),
+  refreshStatus: document.getElementById('refreshStatus'),
   singlePanel: document.getElementById('singlePanel'),
   singleName: document.getElementById('singleName'),
   singleCoords: document.getElementById('singleCoords'),
@@ -19,8 +24,85 @@ const els = {
 
 fetch('stations.json').then(r => r.json()).then(data => {
   STATIONS = data;
-  render('');
+  render(els.search.value);
 });
+
+// Google Sheets only allows cross-origin reads via the gviz JSONP callback,
+// not a plain fetch() (no CORS headers on docs.google.com responses).
+function fetchSheetViaJsonp() {
+  return new Promise((resolve, reject) => {
+    const prevHandler = window.google && window.google.visualization;
+    window.google = window.google || {};
+    window.google.visualization = window.google.visualization || {};
+    window.google.visualization.Query = window.google.visualization.Query || {};
+    window.google.visualization.Query.setResponse = (data) => {
+      cleanup();
+      resolve(data);
+    };
+
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Timed out reaching Google Sheets'));
+    }, 15000);
+
+    function cleanup() {
+      clearTimeout(timer);
+      script.remove();
+      if (prevHandler) window.google.visualization = prevHandler;
+    }
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('Failed to load Google Sheet'));
+    };
+    script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&_=${Date.now()}`;
+    document.body.appendChild(script);
+  });
+}
+
+function parseSheetRows(data) {
+  const rows = (data.table && data.table.rows) || [];
+  const out = [];
+  for (const row of rows) {
+    const c = row.c || [];
+    const id = c[0] && c[0].v;
+    const name = c[1] && c[1].v;
+    const lat = c[2] && c[2].v;
+    const lng = c[3] && c[3].v;
+    if (!id || !name || typeof lat !== 'number' || typeof lng !== 'number') continue;
+    out.push({ id: String(id), name: String(name), lat, lng });
+  }
+  return out;
+}
+
+async function refreshStations() {
+  els.refreshBtn.disabled = true;
+  els.refreshStatus.textContent = 'Checking Google Sheet for new stations...';
+  try {
+    const data = await fetchSheetViaJsonp();
+    const fresh = parseSheetRows(data);
+    if (fresh.length === 0) throw new Error('Sheet returned no rows');
+
+    const existingIds = new Set(STATIONS.map(s => s.id));
+    const newOnes = fresh.filter(s => !existingIds.has(s.id));
+
+    STATIONS = fresh;
+    render(els.search.value);
+
+    if (newOnes.length > 0) {
+      els.refreshStatus.textContent = `Found ${newOnes.length} new station(s). Total: ${STATIONS.length}.`;
+    } else {
+      els.refreshStatus.textContent = `No new stations found. Total: ${STATIONS.length}.`;
+    }
+  } catch (e) {
+    els.refreshStatus.textContent = `Could not refresh from Google Sheet (${e.message}). Showing last known data.`;
+  } finally {
+    els.refreshBtn.disabled = false;
+  }
+}
+
+els.refreshBtn.addEventListener('click', refreshStations);
 
 function haversine(lat1, lng1, lat2, lng2) {
   const R = 6371;
