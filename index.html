@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>SG Station Finder</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --accent:#38bdf8; --text:#e2e8f0; --muted:#94a3b8; --border:#334155;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh;
+  }
+  header{padding:16px; text-align:center; border-bottom:1px solid var(--border);}
+  header h1{margin:0; font-size:1.2rem;}
+  header p{margin:4px 0 0; color:var(--muted); font-size:0.8rem;}
+  main{padding:12px; max-width:600px; margin:0 auto;}
+  .search-box{position:relative; margin-bottom:10px;}
+  input[type=text]{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border);
+    background:var(--card); color:var(--text); font-size:1rem;
+  }
+  input[type=text]:focus{outline:2px solid var(--accent);}
+  .results{max-height:50vh; overflow-y:auto; border-radius:10px; background:var(--card); margin-bottom:12px; border:1px solid var(--border);}
+  .row{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--border); cursor:pointer;}
+  .row:last-child{border-bottom:none;}
+  .row:active{background:#26344a;}
+  .row .info{flex:1; min-width:0;}
+  .row .name{font-size:0.95rem;}
+  .row .id{color:var(--muted); font-size:0.75rem;}
+  .row input[type=checkbox]{width:20px; height:20px; flex-shrink:0;}
+  .empty{padding:14px; color:var(--muted); text-align:center; font-size:0.9rem;}
+  .panel{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:12px;}
+  .panel h2{margin:0 0 8px; font-size:1rem;}
+  .panel .coords{color:var(--muted); font-size:0.85rem; margin-bottom:10px;}
+  .btn{
+    display:inline-block; width:100%; text-align:center; padding:12px; border-radius:8px;
+    background:var(--accent); color:#0b1726; font-weight:600; text-decoration:none; font-size:0.95rem;
+    border:none; cursor:pointer; margin-bottom:8px;
+  }
+  .btn.secondary{background:transparent; border:1px solid var(--accent); color:var(--accent);}
+  iframe{width:100%; height:220px; border:0; border-radius:8px; margin-bottom:10px;}
+  .selected-bar{
+    position:sticky; bottom:0; background:var(--card); border-top:1px solid var(--border);
+    padding:10px 12px; display:flex; align-items:center; gap:10px; border-radius:10px 10px 0 0;
+  }
+  .selected-bar span{flex:1; font-size:0.85rem; color:var(--muted);}
+  .chip{
+    display:inline-flex; align-items:center; gap:4px; background:#26344a; color:var(--text);
+    border-radius:14px; padding:4px 10px; font-size:0.75rem; margin:2px;
+  }
+  .chip button{background:none; border:none; color:var(--muted); cursor:pointer; font-size:0.9rem; padding:0;}
+  .status{font-size:0.8rem; color:var(--muted); margin-top:6px; min-height:1.2em;}
+  footer{text-align:center; color:var(--muted); font-size:0.75rem; padding:20px 10px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>SG Water Quality Stations</h1>
+  <p>Search a station, or select several to plan a route</p>
+</header>
+<main>
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Search station name or ID..." autocomplete="off">
+  </div>
+  <div class="results" id="results"></div>
+
+  <div id="singlePanel" class="panel" style="display:none;">
+    <h2 id="singleName"></h2>
+    <div class="coords" id="singleCoords"></div>
+    <iframe id="singleMap" loading="lazy"></iframe>
+    <a class="btn" id="directionsLink" target="_blank" rel="noopener">Directions from my location</a>
+  </div>
+
+  <div id="multiPanel" class="panel" style="display:none;">
+    <h2>Selected stations (<span id="selCount">0</span>)</h2>
+    <div id="chips"></div>
+    <button class="btn" id="planRoute">Plan route on RouteXL</button>
+    <button class="btn secondary" id="clearSel">Clear selection</button>
+    <div class="status" id="routeStatus"></div>
+  </div>
+</main>
+<footer>Data source: Google Sheet · Hosted on GitHub Pages</footer>
+<script src="app.js"></script>
+</body>
+</html>
