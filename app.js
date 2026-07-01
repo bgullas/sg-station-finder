@@ -40,7 +40,6 @@ const els = {
   mStationName:  document.getElementById('mStationName'),
   mStationId:    document.getElementById('mStationId'),
   copeE:         document.getElementById('copeE'),
-  copeF:         document.getElementById('copeF'),
   copeG:         document.getElementById('copeG'),
   depthEF:       document.getElementById('depthEF'),
   waterLevel:    document.getElementById('waterLevel'),
@@ -254,13 +253,12 @@ function selectMStation(s) {
   els.mStationId.textContent = s.id;
 
   els.copeE.innerHTML = fmtCope(s.copeE);
-  els.copeF.innerHTML = fmtCope(s.copeF);
   els.copeG.innerHTML = fmtCope(s.copeG);
 
-  // Auto-compute Cope − Side Invert (E − F)
-  if (s.copeE !== null && s.copeF !== null) {
-    const ef = s.copeE - s.copeF;
-    els.depthEF.textContent = ef.toFixed(3);
+  // Auto-compute Cope − Side Invert (E − G)
+  if (s.copeE !== null && s.copeG !== null) {
+    const eg = s.copeE - s.copeG;
+    els.depthEF.textContent = eg.toFixed(3);
     els.depthEF.className = 'big-result-val';
   } else {
     els.depthEF.textContent = 'N/A';
