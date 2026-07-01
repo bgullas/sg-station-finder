@@ -57,6 +57,7 @@
   .result-box.positive{background:#14532d33;border:1px solid #4ade8066;}
   .result-box.negative{background:#7f1d1d33;border:1px solid #f8717166;}
   .result-box.neutral{background:var(--card);border:1px solid var(--border);}
+  .section-label{font-size:0.75rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
   footer{text-align:center;color:var(--muted);font-size:0.75rem;padding:20px 10px;}
 </style>
 </head>
@@ -105,29 +106,46 @@
     <h2 id="mStationName"></h2>
     <div class="coords" id="mStationId"></div>
 
-    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">Cope-Side Invert Values</div>
+    <!-- Raw levels -->
+    <div class="section-label">Structure Levels (mRL)</div>
     <div class="cope-grid">
       <div class="cope-card">
-        <div class="label">Col E</div>
+        <div class="label">Cope (E)</div>
         <div class="val" id="copeE">—</div>
       </div>
       <div class="cope-card">
-        <div class="label">Col F</div>
+        <div class="label">Side Invert F</div>
         <div class="val" id="copeF">—</div>
       </div>
       <div class="cope-card">
-        <div class="label">Col G</div>
+        <div class="label">Side Invert G</div>
         <div class="val" id="copeG">—</div>
       </div>
     </div>
 
-    <label style="font-size:0.85rem;color:var(--muted);display:block;margin-bottom:4px;">Current Web Water Level (m)</label>
+    <!-- Auto-computed: Cope − Side Invert -->
+    <div class="section-label">Cope to Side Invert Depth</div>
+    <div class="cope-grid">
+      <div class="cope-card">
+        <div class="label">E − F</div>
+        <div class="val" id="depthEF">—</div>
+      </div>
+      <div class="cope-card">
+        <div class="label">E − G</div>
+        <div class="val" id="depthEG">—</div>
+      </div>
+      <div class="cope-card" style="visibility:hidden;"></div>
+    </div>
+
+    <!-- User input: water level -->
+    <div class="section-label" style="margin-top:4px;">Water Level Entry</div>
+    <label style="font-size:0.82rem;color:var(--muted);display:block;margin-bottom:4px;">Current Web Water Level (m)</label>
     <input type="number" id="waterLevel" placeholder="e.g. 1.25" step="0.001" inputmode="decimal">
 
     <div id="depthResult" class="result-box neutral" style="display:none;">
       <div class="label">Cope to Water Depth</div>
       <div class="depth" id="depthVal"></div>
-      <div class="unit">metres (Col E − Water Level)</div>
+      <div class="unit">metres (Cope E − Water Level)</div>
     </div>
 
     <div class="status" id="mStatus"></div>

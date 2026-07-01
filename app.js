@@ -42,6 +42,8 @@ const els = {
   copeE:         document.getElementById('copeE'),
   copeF:         document.getElementById('copeF'),
   copeG:         document.getElementById('copeG'),
+  depthEF:       document.getElementById('depthEF'),
+  depthEG:       document.getElementById('depthEG'),
   waterLevel:    document.getElementById('waterLevel'),
   depthResult:   document.getElementById('depthResult'),
   depthVal:      document.getElementById('depthVal'),
@@ -251,13 +253,29 @@ function selectMStation(s) {
   els.mPanel.style.display = 'block';
   els.mStationName.textContent = s.name;
   els.mStationId.textContent = s.id;
+
   els.copeE.innerHTML = fmtCope(s.copeE);
   els.copeF.innerHTML = fmtCope(s.copeF);
   els.copeG.innerHTML = fmtCope(s.copeG);
+
+  // Auto-compute Cope − Side Invert depths
+  if (s.copeE !== null && s.copeF !== null) {
+    const ef = s.copeE - s.copeF;
+    els.depthEF.innerHTML = `<span style="color:var(--green)">${ef.toFixed(3)}</span>`;
+  } else {
+    els.depthEF.innerHTML = '<span class="na">N/A</span>';
+  }
+  if (s.copeE !== null && s.copeG !== null) {
+    const eg = s.copeE - s.copeG;
+    els.depthEG.innerHTML = `<span style="color:var(--green)">${eg.toFixed(3)}</span>`;
+  } else {
+    els.depthEG.innerHTML = '<span class="na">N/A</span>';
+  }
+
   els.waterLevel.value = '';
   els.depthResult.style.display = 'none';
   els.mStatus.textContent = s.copeE === null
-    ? 'No Cope-Side Invert value (Col E) recorded yet for this station.'
+    ? 'No Cope level (Col E) recorded yet for this station.'
     : '';
   els.mPanel.scrollIntoView({ behavior: 'smooth' });
 }
