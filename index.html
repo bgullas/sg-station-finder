@@ -6,65 +6,73 @@
 <title>SG Station Finder</title>
 <style>
   :root{
-    --bg:#0f172a; --card:#1e293b; --accent:#38bdf8; --text:#e2e8f0; --muted:#94a3b8; --border:#334155;
+    --bg:#0f172a; --card:#1e293b; --accent:#38bdf8; --text:#e2e8f0; --muted:#94a3b8;
+    --border:#334155; --green:#4ade80; --orange:#fb923c; --red:#f87171;
   }
   *{box-sizing:border-box;}
-  body{
-    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    background:var(--bg); color:var(--text); min-height:100vh;
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  header{padding:14px 16px 0;text-align:center;border-bottom:1px solid var(--border);}
+  header h1{margin:0 0 10px;font-size:1.15rem;}
+  .tabs{display:flex;gap:0;}
+  .tab{flex:1;padding:10px 4px;text-align:center;font-size:0.9rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  main{padding:12px;max-width:600px;margin:0 auto;}
+  input[type=text],input[type=number]{
+    width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);
+    background:var(--card);color:var(--text);font-size:1rem;margin-bottom:10px;
   }
-  header{padding:16px; text-align:center; border-bottom:1px solid var(--border);}
-  header h1{margin:0; font-size:1.2rem;}
-  header p{margin:4px 0 0; color:var(--muted); font-size:0.8rem;}
-  main{padding:12px; max-width:600px; margin:0 auto;}
-  .search-box{position:relative; margin-bottom:10px;}
-  input[type=text]{
-    width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border);
-    background:var(--card); color:var(--text); font-size:1rem;
-  }
-  input[type=text]:focus{outline:2px solid var(--accent);}
-  .results{max-height:50vh; overflow-y:auto; border-radius:10px; background:var(--card); margin-bottom:12px; border:1px solid var(--border);}
-  .row{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--border); cursor:pointer;}
+  input:focus{outline:2px solid var(--accent);}
+  .results{max-height:46vh;overflow-y:auto;border-radius:10px;background:var(--card);margin-bottom:12px;border:1px solid var(--border);}
+  .row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;}
   .row:last-child{border-bottom:none;}
   .row:active{background:#26344a;}
-  .row .info{flex:1; min-width:0;}
+  .row .info{flex:1;min-width:0;}
   .row .name{font-size:0.95rem;}
-  .row .id{color:var(--muted); font-size:0.75rem;}
-  .row input[type=checkbox]{width:20px; height:20px; flex-shrink:0;}
-  .empty{padding:14px; color:var(--muted); text-align:center; font-size:0.9rem;}
-  .panel{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:12px;}
-  .panel h2{margin:0 0 8px; font-size:1rem;}
-  .panel .coords{color:var(--muted); font-size:0.85rem; margin-bottom:10px;}
-  .btn{
-    display:inline-block; width:100%; text-align:center; padding:12px; border-radius:8px;
-    background:var(--accent); color:#0b1726; font-weight:600; text-decoration:none; font-size:0.95rem;
-    border:none; cursor:pointer; margin-bottom:8px;
-  }
-  .btn.secondary{background:transparent; border:1px solid var(--accent); color:var(--accent);}
-  iframe{width:100%; height:220px; border:0; border-radius:8px; margin-bottom:10px;}
-  .selected-bar{
-    position:sticky; bottom:0; background:var(--card); border-top:1px solid var(--border);
-    padding:10px 12px; display:flex; align-items:center; gap:10px; border-radius:10px 10px 0 0;
-  }
-  .selected-bar span{flex:1; font-size:0.85rem; color:var(--muted);}
-  .chip{
-    display:inline-flex; align-items:center; gap:4px; background:#26344a; color:var(--text);
-    border-radius:14px; padding:4px 10px; font-size:0.75rem; margin:2px;
-  }
-  .chip button{background:none; border:none; color:var(--muted); cursor:pointer; font-size:0.9rem; padding:0;}
-  .status{font-size:0.8rem; color:var(--muted); margin-top:6px; min-height:1.2em;}
-  footer{text-align:center; color:var(--muted); font-size:0.75rem; padding:20px 10px;}
+  .row .sid{color:var(--muted);font-size:0.75rem;}
+  .row input[type=checkbox]{width:20px;height:20px;flex-shrink:0;}
+  .empty{padding:14px;color:var(--muted);text-align:center;font-size:0.9rem;}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+  .panel h2{margin:0 0 8px;font-size:1rem;}
+  .panel .coords{color:var(--muted);font-size:0.85rem;margin-bottom:10px;}
+  .btn{display:block;width:100%;text-align:center;padding:12px;border-radius:8px;background:var(--accent);color:#0b1726;font-weight:600;text-decoration:none;font-size:0.95rem;border:none;cursor:pointer;margin-bottom:8px;}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .btn.secondary{background:transparent;border:1px solid var(--accent);color:var(--accent);}
+  iframe{width:100%;height:210px;border:0;border-radius:8px;margin-bottom:10px;}
+  .chip{display:inline-flex;align-items:center;gap:4px;background:#26344a;color:var(--text);border-radius:14px;padding:4px 10px;font-size:0.75rem;margin:2px;}
+  .chip button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.9rem;padding:0;}
+  .status{font-size:0.8rem;color:var(--muted);margin-top:4px;min-height:1.2em;}
+
+  /* Measurements tab */
+  .cope-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+  .cope-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;}
+  .cope-card .label{font-size:0.7rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+  .cope-card .val{font-size:1.1rem;font-weight:700;}
+  .cope-card .val.na{color:var(--muted);font-size:0.85rem;}
+  .result-box{border-radius:10px;padding:16px;text-align:center;margin-bottom:12px;}
+  .result-box .label{font-size:0.8rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+  .result-box .depth{font-size:2rem;font-weight:800;}
+  .result-box .unit{font-size:0.85rem;color:var(--muted);}
+  .result-box.positive{background:#14532d33;border:1px solid #4ade8066;}
+  .result-box.negative{background:#7f1d1d33;border:1px solid #f8717166;}
+  .result-box.neutral{background:var(--card);border:1px solid var(--border);}
+  footer{text-align:center;color:var(--muted);font-size:0.75rem;padding:20px 10px;}
 </style>
 </head>
 <body>
 <header>
   <h1>SG Water Quality Stations</h1>
-  <p>Search a station, or select several to plan a route</p>
-</header>
-<main>
-  <div class="search-box">
-    <input type="text" id="search" placeholder="Search station name or ID..." autocomplete="off">
+  <div class="tabs">
+    <div class="tab active" data-tab="finder">Station Finder</div>
+    <div class="tab" data-tab="measurements">Measurements</div>
   </div>
+</header>
+
+<!-- ── TAB 1: Station Finder ── -->
+<div id="tab-finder" class="tab-content active">
+<main>
+  <input type="text" id="search" placeholder="Search station name or ID..." autocomplete="off">
   <button class="btn secondary" id="refreshBtn">Refresh stations from Google Sheet</button>
   <div class="status" id="refreshStatus"></div>
   <div class="results" id="results"></div>
@@ -85,6 +93,48 @@
     <a class="btn" id="routeLink" href="#" target="_blank" rel="noopener" style="display:none;">Open route on RouteXL</a>
   </div>
 </main>
+</div>
+
+<!-- ── TAB 2: Measurements ── -->
+<div id="tab-measurements" class="tab-content">
+<main>
+  <input type="text" id="msearch" placeholder="Search station name or ID..." autocomplete="off">
+  <div class="results" id="mresults"></div>
+
+  <div id="mPanel" class="panel" style="display:none;">
+    <h2 id="mStationName"></h2>
+    <div class="coords" id="mStationId"></div>
+
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">Cope-Side Invert Values</div>
+    <div class="cope-grid">
+      <div class="cope-card">
+        <div class="label">Col E</div>
+        <div class="val" id="copeE">—</div>
+      </div>
+      <div class="cope-card">
+        <div class="label">Col F</div>
+        <div class="val" id="copeF">—</div>
+      </div>
+      <div class="cope-card">
+        <div class="label">Col G</div>
+        <div class="val" id="copeG">—</div>
+      </div>
+    </div>
+
+    <label style="font-size:0.85rem;color:var(--muted);display:block;margin-bottom:4px;">Current Web Water Level (m)</label>
+    <input type="number" id="waterLevel" placeholder="e.g. 1.25" step="0.001" inputmode="decimal">
+
+    <div id="depthResult" class="result-box neutral" style="display:none;">
+      <div class="label">Cope to Water Depth</div>
+      <div class="depth" id="depthVal"></div>
+      <div class="unit">metres (Col E − Water Level)</div>
+    </div>
+
+    <div class="status" id="mStatus"></div>
+  </div>
+</main>
+</div>
+
 <footer>Data source: Google Sheet · Hosted on GitHub Pages</footer>
 <script src="app.js"></script>
 </body>
