@@ -257,12 +257,14 @@ function selectMStation(s) {
   els.copeF.innerHTML = fmtCope(s.copeF);
   els.copeG.innerHTML = fmtCope(s.copeG);
 
-  // Auto-compute Cope − Side Invert depths
+  // Auto-compute Cope − Side Invert (E − F)
   if (s.copeE !== null && s.copeF !== null) {
     const ef = s.copeE - s.copeF;
-    els.depthEF.innerHTML = `<span style="color:var(--green)">${ef.toFixed(3)}</span>`;
+    els.depthEF.textContent = ef.toFixed(3);
+    els.depthEF.className = 'big-result-val';
   } else {
-    els.depthEF.innerHTML = '<span class="na">N/A</span>';
+    els.depthEF.textContent = 'N/A';
+    els.depthEF.className = 'big-result-val na';
   }
 
   els.waterLevel.value = '';

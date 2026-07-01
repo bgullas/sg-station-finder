@@ -58,6 +58,11 @@
   .result-box.negative{background:#7f1d1d33;border:1px solid #f8717166;}
   .result-box.neutral{background:var(--card);border:1px solid var(--border);}
   .section-label{font-size:0.75rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+  .big-result{background:#0c2a3a;border:2px solid var(--accent);border-radius:10px;padding:16px;text-align:center;margin-bottom:14px;}
+  .big-result-label{font-size:0.75rem;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+  .big-result-val{font-size:2.2rem;font-weight:800;color:var(--text);}
+  .big-result-val.na{font-size:1.1rem;color:var(--muted);}
+  .big-result-unit{font-size:0.78rem;color:var(--muted);margin-top:4px;}
   footer{text-align:center;color:var(--muted);font-size:0.75rem;padding:20px 10px;}
 </style>
 </head>
@@ -124,14 +129,10 @@
     </div>
 
     <!-- Auto-computed: Cope − Side Invert -->
-    <div class="section-label">Cope to Side Invert</div>
-    <div class="cope-grid">
-      <div class="cope-card">
-        <div class="label">Cope to Side Invert</div>
-        <div class="val" id="depthEF">—</div>
-      </div>
-      <div class="cope-card" style="visibility:hidden;"></div>
-      <div class="cope-card" style="visibility:hidden;"></div>
+    <div class="big-result">
+      <div class="big-result-label">Cope to Side Invert</div>
+      <div class="big-result-val" id="depthEF">—</div>
+      <div class="big-result-unit">metres (Col E − Col F)</div>
     </div>
 
     <!-- User input: water level -->
