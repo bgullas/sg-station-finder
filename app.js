@@ -43,7 +43,6 @@ const els = {
   copeF:         document.getElementById('copeF'),
   copeG:         document.getElementById('copeG'),
   depthEF:       document.getElementById('depthEF'),
-  depthEG:       document.getElementById('depthEG'),
   waterLevel:    document.getElementById('waterLevel'),
   depthResult:   document.getElementById('depthResult'),
   depthVal:      document.getElementById('depthVal'),
@@ -264,12 +263,6 @@ function selectMStation(s) {
     els.depthEF.innerHTML = `<span style="color:var(--green)">${ef.toFixed(3)}</span>`;
   } else {
     els.depthEF.innerHTML = '<span class="na">N/A</span>';
-  }
-  if (s.copeE !== null && s.copeG !== null) {
-    const eg = s.copeE - s.copeG;
-    els.depthEG.innerHTML = `<span style="color:var(--green)">${eg.toFixed(3)}</span>`;
-  } else {
-    els.depthEG.innerHTML = '<span class="na">N/A</span>';
   }
 
   els.waterLevel.value = '';
