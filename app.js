@@ -42,6 +42,7 @@ const els = {
   copeE:         document.getElementById('copeE'),
   copeG:         document.getElementById('copeG'),
   copeAngle:     document.getElementById('copeAngle'),
+  copeOffset:    document.getElementById('copeOffset'),
   depthEF:       document.getElementById('depthEF'),
   waterLevel:    document.getElementById('waterLevel'),
   depthResult:   document.getElementById('depthResult'),
@@ -88,6 +89,7 @@ function parseSheetRows(data) {
       copeF: typeof c[5]?.v === 'number' ? c[5].v : null,
       copeG: typeof c[6]?.v === 'number' ? c[6].v : null,
       angle: typeof c[7]?.v === 'number' ? c[7].v : null,
+      offset: typeof c[8]?.v === 'number' ? c[8].v : null,
     });
   }
   return out;
@@ -257,10 +259,12 @@ function selectMStation(s) {
   els.copeE.innerHTML = fmtCope(s.copeE);
   els.copeG.innerHTML = fmtCope(s.copeG);
   els.copeAngle.innerHTML = s.angle !== null ? `${s.angle}°` : '<span class="na">N/A</span>';
+  els.copeOffset.innerHTML = s.offset !== null ? fmtCope(s.offset) : '<span class="na">—</span>';
 
-  // Auto-compute (E − G) × sin(angle°)
+  // Auto-compute (E − G − offset) / sin(angle)
   if (s.copeE !== null && s.copeG !== null && s.angle !== null) {
-    const result = (s.copeE - s.copeG) / Math.sin(s.angle * Math.PI / 180);
+    const off = s.offset ?? 0;
+    const result = (s.copeE - s.copeG - off) / Math.sin(s.angle * Math.PI / 180);
     els.depthEF.textContent = result.toFixed(3);
     els.depthEF.className = 'big-result-val';
   } else {
@@ -280,16 +284,18 @@ function computeDepth() {
   if (!mStation) return;
   const wl = parseFloat(els.waterLevel.value);
   if (isNaN(wl)) { els.depthResult.style.display = 'none'; return; }
-  if (mStation.copeE === null) {
+  if (mStation.copeE === null || mStation.angle === null) {
     els.depthResult.style.display = 'none';
-    els.mStatus.textContent = 'Cannot compute: Col E (Cope-Side Invert) is not recorded for this station.';
+    els.mStatus.textContent = 'Cannot compute: Cope (E) or Angle not recorded for this station.';
     return;
   }
-  const depth = mStation.copeE - wl;
+  const off = mStation.offset ?? 0;
+  const depth = (mStation.copeE - wl - off) / Math.sin(mStation.angle * Math.PI / 180);
   els.depthVal.textContent = depth.toFixed(3) + ' m';
   els.depthResult.className = 'result-box ' + (depth > 0 ? 'positive' : depth < 0 ? 'negative' : 'neutral');
   els.depthResult.style.display = 'block';
-  els.mStatus.textContent = `Col E (${mStation.copeE.toFixed(3)}) − Water Level (${wl.toFixed(3)}) = ${depth.toFixed(3)} m`;
+  const offNote = off !== 0 ? ` − offset(${off})` : '';
+  els.mStatus.textContent = `(E(${mStation.copeE.toFixed(3)}) − WL(${wl.toFixed(3)})${offNote}) ÷ sin(${mStation.angle}°) = ${depth.toFixed(3)} m`;
 }
 
 els.msearch.addEventListener('input', () => renderMeasure(els.msearch.value));
