@@ -260,7 +260,7 @@ function selectMStation(s) {
 
   // Auto-compute (E − G) × sin(angle°)
   if (s.copeE !== null && s.copeG !== null && s.angle !== null) {
-    const result = (s.copeE - s.copeG) * Math.sin(s.angle * Math.PI / 180);
+    const result = (s.copeE - s.copeG) / Math.sin(s.angle * Math.PI / 180);
     els.depthEF.textContent = result.toFixed(3);
     els.depthEF.className = 'big-result-val';
   } else {
