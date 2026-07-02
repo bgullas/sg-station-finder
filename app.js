@@ -41,6 +41,7 @@ const els = {
   mStationId:    document.getElementById('mStationId'),
   copeE:         document.getElementById('copeE'),
   copeG:         document.getElementById('copeG'),
+  copeAngle:     document.getElementById('copeAngle'),
   depthEF:       document.getElementById('depthEF'),
   waterLevel:    document.getElementById('waterLevel'),
   depthResult:   document.getElementById('depthResult'),
@@ -86,6 +87,7 @@ function parseSheetRows(data) {
       copeE: typeof c[4]?.v === 'number' ? c[4].v : null,
       copeF: typeof c[5]?.v === 'number' ? c[5].v : null,
       copeG: typeof c[6]?.v === 'number' ? c[6].v : null,
+      angle: typeof c[7]?.v === 'number' ? c[7].v : null,
     });
   }
   return out;
@@ -254,11 +256,12 @@ function selectMStation(s) {
 
   els.copeE.innerHTML = fmtCope(s.copeE);
   els.copeG.innerHTML = fmtCope(s.copeG);
+  els.copeAngle.innerHTML = s.angle !== null ? `${s.angle}°` : '<span class="na">N/A</span>';
 
-  // Auto-compute Cope − Side Invert (E − G)
-  if (s.copeE !== null && s.copeG !== null) {
-    const eg = s.copeE - s.copeG;
-    els.depthEF.textContent = eg.toFixed(3);
+  // Auto-compute (E − G) × sin(angle°)
+  if (s.copeE !== null && s.copeG !== null && s.angle !== null) {
+    const result = (s.copeE - s.copeG) * Math.sin(s.angle * Math.PI / 180);
+    els.depthEF.textContent = result.toFixed(3);
     els.depthEF.className = 'big-result-val';
   } else {
     els.depthEF.textContent = 'N/A';
