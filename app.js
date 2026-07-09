@@ -304,8 +304,9 @@ els.waterLevel.addEventListener('input', computeDepth);
 // ── Send Data tab ──────────────────────────────────────────────
 
 // Per-station session state (keyed by station ID suffix e.g. "WWS499")
-const sdBattery  = new Map(); // { base, current }
+const sdBattery  = new Map(); // { val }
 const sdAlertSt  = new Map(); // { level, prevPct, hasReading }
+const sdSpToggle = new Map(); // alternates SingTel/Starhub in maintenance mode
 
 const RISE_THRESH = [50, 75, 90, 100];
 
@@ -384,8 +385,19 @@ function sdBuildPayload(commit) {
   const md2    = document.getElementById('sdMd2').checked ? 'H' : 'L';
   const ts_r   = Math.floor(Date.now() / 1000);
 
+  // sp alternates SingTel/Starhub each send when in maintenance (M), fixed SingTel when active (N)
+  let sp = 'SingTel';
+  if (md === 'M' && commit) {
+    const cur = sdSpToggle.get(suffix) || 0;
+    sp = cur % 2 === 0 ? 'SingTel' : 'Starhub';
+    sdSpToggle.set(suffix, cur + 1);
+  } else if (md === 'M') {
+    const cur = sdSpToggle.get(suffix) || 0;
+    sp = cur % 2 === 0 ? 'SingTel' : 'Starhub';
+  }
+
   const payload = {
-    sid, sp: 'SingTel', ts_r,
+    sid, sp, ts_r,
     wa, wl, raw,
     al, alcl: 0,
     md, md2,
