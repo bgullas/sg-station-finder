@@ -64,6 +64,30 @@
   .big-result-val.na{font-size:1.1rem;color:var(--muted);}
   .big-result-unit{font-size:0.78rem;color:var(--muted);margin-top:4px;}
   footer{text-align:center;color:var(--muted);font-size:0.75rem;padding:20px 10px;}
+
+  /* Send Data tab */
+  .field-label{font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;margin-top:10px;display:block;}
+  .field-label:first-child{margin-top:0;}
+  .toggle-row{display:flex;gap:12px;margin:12px 0;}
+  .toggle-group{display:flex;align-items:center;gap:8px;flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+  .toggle-label{font-size:0.8rem;color:var(--muted);flex:1;}
+  .toggle-switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;}
+  .toggle-switch input{opacity:0;width:0;height:0;}
+  .toggle-slider{position:absolute;cursor:pointer;inset:0;background:#334155;border-radius:24px;transition:background .2s;}
+  .toggle-slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#94a3b8;border-radius:50%;transition:transform .2s,background .2s;}
+  .toggle-switch input:checked + .toggle-slider{background:#0c2a3a;border:1px solid var(--accent);}
+  .toggle-switch input:checked + .toggle-slider:before{transform:translateX(20px);background:var(--accent);}
+  .toggle-val{font-size:0.95rem;font-weight:700;width:20px;text-align:center;color:var(--text);}
+  .json-preview{background:#0b1525;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.75rem;font-family:monospace;color:#7dd3fc;overflow-x:auto;white-space:pre;margin-bottom:12px;max-height:260px;overflow-y:auto;}
+  .send-status{font-size:0.85rem;padding:10px 12px;border-radius:8px;margin-bottom:10px;}
+  .send-status.ok{background:#14532d33;border:1px solid #4ade8066;color:#4ade80;}
+  .send-status.err{background:#7f1d1d33;border:1px solid #f8717166;color:#f87171;}
+  .send-status.info{background:#1e293b;border:1px solid var(--border);color:var(--muted);}
+  details.settings-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px;}
+  details.settings-panel summary{cursor:pointer;font-size:0.82rem;font-weight:600;color:var(--muted);user-select:none;list-style:none;}
+  details.settings-panel summary::-webkit-details-marker{display:none;}
+  details.settings-panel summary::before{content:"⚙  Settings";}
+  details.settings-panel[open] > summary + *{margin-top:10px;}
 </style>
 </head>
 <body>
@@ -72,6 +96,7 @@
   <div class="tabs">
     <div class="tab active" data-tab="finder">Station Finder</div>
     <div class="tab" data-tab="measurements">Measurements</div>
+    <div class="tab" data-tab="senddata">Send Data</div>
   </div>
 </header>
 
@@ -154,6 +179,63 @@
 
     <div class="status" id="mStatus"></div>
   </div>
+</main>
+</div>
+
+<!-- ── TAB 3: Send Data ── -->
+<div id="tab-senddata" class="tab-content">
+<main>
+
+  <!-- Settings -->
+  <details class="settings-panel">
+    <summary></summary>
+    <div>
+      <label class="field-label">Lambda Endpoint URL</label>
+      <input type="url" id="sdEndpoint" placeholder="https://xxxx.lambda-url.ap-southeast-1.on.aws/" autocomplete="off" style="margin-bottom:6px;">
+      <label class="field-label">Alert Delta (cm, default 2)</label>
+      <input type="number" id="sdDelta" value="2" min="0" max="20" step="0.5" style="max-width:120px;">
+    </div>
+  </details>
+
+  <!-- Station & Reading -->
+  <div class="panel">
+    <label class="field-label">Station ID (e.g. WWS499 or CWS184)</label>
+    <input type="text" id="sdStation" placeholder="WWS499" autocomplete="off" style="text-transform:uppercase;letter-spacing:.05em;" maxlength="10">
+
+    <label class="field-label">Water Level (metres, 3 decimals)</label>
+    <input type="number" id="sdLevel" placeholder="0.000" step="0.001" min="0" max="5" inputmode="decimal">
+
+    <div class="toggle-row">
+      <div class="toggle-group">
+        <span class="toggle-label">MD</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="sdMd">
+          <span class="toggle-slider"></span>
+        </label>
+        <span id="sdMdVal" class="toggle-val">N</span>
+      </div>
+      <div class="toggle-group">
+        <span class="toggle-label">MD2</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="sdMd2">
+          <span class="toggle-slider"></span>
+        </label>
+        <span id="sdMd2Val" class="toggle-val">L</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Computed preview -->
+  <div class="panel" id="sdPreviewPanel" style="display:none;">
+    <div class="section-label" style="margin-bottom:8px;">Payload Preview</div>
+    <pre class="json-preview" id="sdJson"></pre>
+  </div>
+
+  <!-- Actions -->
+  <button class="btn" id="sdPreviewBtn" style="margin-bottom:6px;">Preview JSON</button>
+  <button class="btn" id="sdSendBtn" style="background:#16a34a;">Send to AWS IoT</button>
+  <div id="sdStatus" class="status" style="margin-top:6px;"></div>
+
 </main>
 </div>
 
