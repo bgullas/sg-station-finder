@@ -404,7 +404,7 @@ function sdShowStatus(msg, type) {
 }
 
 // Persist settings to localStorage
-const DEFAULT_ENDPOINT = 'https://njz9fn13nf.execute-api.ap-southeast-1.amazonaws.com/';
+const DEFAULT_ENDPOINT = 'https://tn8w89pdw5.execute-api.ap-southeast-1.amazonaws.com/';
 
 function sdLoadSettings() {
   const ep = localStorage.getItem('sd_endpoint') || DEFAULT_ENDPOINT;
