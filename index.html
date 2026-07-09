@@ -155,8 +155,21 @@
         <div class="label">Offset (I)</div>
         <div class="val" id="copeOffset">—</div>
       </div>
-      <div class="cope-card" style="visibility:hidden;"></div>
-      <div class="cope-card" style="visibility:hidden;"></div>
+    </div>
+
+    <!-- Field measurements -->
+    <div class="section-label" style="margin-top:8px;">Field Measurements (mRL)</div>
+    <div class="cope-grid">
+      <div class="cope-card">
+        <div class="label">Sensor Level</div>
+        <input type="number" id="sensorLevel" placeholder="—" step="0.001" inputmode="decimal"
+          style="width:100%;background:transparent;border:none;color:var(--text);font-size:1.1rem;font-weight:700;text-align:center;padding:2px 0;">
+      </div>
+      <div class="cope-card">
+        <div class="label">Operations Level</div>
+        <input type="number" id="operationsLevel" placeholder="—" step="0.001" inputmode="decimal"
+          style="width:100%;background:transparent;border:none;color:var(--text);font-size:1.1rem;font-weight:700;text-align:center;padding:2px 0;">
+      </div>
     </div>
 
     <!-- Auto-computed: Cope − Side Invert -->
@@ -235,6 +248,13 @@
   <button class="btn" id="sdPreviewBtn" style="margin-bottom:6px;">Preview JSON</button>
   <button class="btn" id="sdSendBtn" style="background:#16a34a;margin-bottom:6px;">Send to AWS IoT</button>
 
+  <!-- Canal send -->
+  <button class="btn" id="sdEmptyBtn" style="background:#0369a1;margin-bottom:6px;">Send Empty Canal</button>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+    <input type="number" id="sdCopeToWater" placeholder="Cope to Water Level (m)" step="0.001" inputmode="decimal" style="flex:1;">
+    <button class="btn" id="sdWaterInBtn" style="background:#0369a1;white-space:nowrap;">Send Water In Canal</button>
+  </div>
+
   <!-- Sequences -->
   <div style="display:flex;gap:8px;margin-bottom:6px;">
     <button class="btn secondary" id="sdCalBtn" style="flex:1;">Calibration</button>
@@ -257,6 +277,6 @@
 </div>
 
 <footer>Data source: Google Sheet · Hosted on GitHub Pages</footer>
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

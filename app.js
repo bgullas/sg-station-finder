@@ -604,3 +604,72 @@ document.getElementById('sdSmaBtn').addEventListener('click', () => {
 document.getElementById('sdCancelBtn').addEventListener('click', () => {
   sdSeqCancelled = true;
 });
+
+// ── Canal send helpers ─────────────────────────────────────────
+function sdFindStation(suffix) {
+  const id = 'WLC21_' + suffix;
+  return STATIONS.find(s => s.id === id) || null;
+}
+
+async function sdDoSendWithWa(waOverride) {
+  const endpoint = document.getElementById('sdEndpoint').value.trim();
+  if (!endpoint) throw new Error('No endpoint configured');
+  const result = sdBuildPayload(true);
+  if (result.err) throw new Error(result.err);
+  const { payload, topic } = result;
+  payload.wa = parseFloat(waOverride.toFixed(3));
+  payload.wl = Math.round(payload.wa * 100);
+  payload.raw = sdComputeRaw(payload.wa);
+  document.getElementById('sdJson').textContent =
+    `// Topic: ${topic}\n` + JSON.stringify(payload, null, 2);
+  document.getElementById('sdPreviewPanel').style.display = 'block';
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic, payload })
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return payload;
+}
+
+// Send Empty Canal: wa = sensorLevel − copeG
+document.getElementById('sdEmptyBtn').addEventListener('click', async () => {
+  const suffix = document.getElementById('sdStation').value.trim().toUpperCase();
+  if (!suffix) { sdShowStatus('Enter a station ID first.', 'err'); return; }
+  const station = sdFindStation(suffix);
+  if (!station || station.copeG == null) { sdShowStatus('Station not found or missing Side Invert G.', 'err'); return; }
+  const sensorLevel = parseFloat(document.getElementById('sensorLevel').value);
+  if (isNaN(sensorLevel)) { sdShowStatus('Enter Sensor Level in Measurements tab first.', 'err'); return; }
+  const wa = sensorLevel - station.copeG;
+  sdShowStatus('Sending Empty Canal…', 'info');
+  document.getElementById('sdEmptyBtn').disabled = true;
+  try {
+    const payload = await sdDoSendWithWa(wa);
+    sdShowStatus(`Empty Canal sent OK · wa=${payload.wa} · al=${payload.al} · ${new Date().toLocaleTimeString()}`, 'ok');
+  } catch (e) {
+    sdShowStatus(`Send failed: ${e.message}`, 'err');
+  } finally {
+    document.getElementById('sdEmptyBtn').disabled = false;
+  }
+});
+
+// Send Water In Canal: wa = copeE − copeG − copeToWaterLevel
+document.getElementById('sdWaterInBtn').addEventListener('click', async () => {
+  const suffix = document.getElementById('sdStation').value.trim().toUpperCase();
+  if (!suffix) { sdShowStatus('Enter a station ID first.', 'err'); return; }
+  const station = sdFindStation(suffix);
+  if (!station || station.copeE == null || station.copeG == null) { sdShowStatus('Station not found or missing Cope E / Side Invert G.', 'err'); return; }
+  const copeToWater = parseFloat(document.getElementById('sdCopeToWater').value);
+  if (isNaN(copeToWater)) { sdShowStatus('Enter Cope to Water Level value.', 'err'); return; }
+  const wa = station.copeE - station.copeG - copeToWater;
+  sdShowStatus('Sending Water In Canal…', 'info');
+  document.getElementById('sdWaterInBtn').disabled = true;
+  try {
+    const payload = await sdDoSendWithWa(wa);
+    sdShowStatus(`Water In Canal sent OK · wa=${payload.wa} · al=${payload.al} · ${new Date().toLocaleTimeString()}`, 'ok');
+  } catch (e) {
+    sdShowStatus(`Send failed: ${e.message}`, 'err');
+  } finally {
+    document.getElementById('sdWaterInBtn').disabled = false;
+  }
+});
