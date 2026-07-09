@@ -216,8 +216,9 @@ els.planRoute.addEventListener('click', async () => {
   const rest = stations.filter(s => s.id !== farthest.id);
 
   const parts = [`${loc.lat.toFixed(6)},${loc.lng.toFixed(6)}`];
-  for (const s of rest) parts.push(`${s.id} ${s.lat.toFixed(6)},${s.lng.toFixed(6)}`);
-  parts.push(`${farthest.id} ${farthest.lat.toFixed(6)},${farthest.lng.toFixed(6)}`);
+  const tag = s => s.id.replace('WLC21_', '');
+  for (const s of rest) parts.push(`${tag(s)} ${s.lat.toFixed(6)},${s.lng.toFixed(6)}`);
+  parts.push(`${tag(farthest)} ${farthest.lat.toFixed(6)},${farthest.lng.toFixed(6)}`);
 
   const url = `https://www.routexl.com/?q=${parts.map(encodeURIComponent).join('$')}&lang=en`;
   els.routeStatus.textContent = `Start: your location → ${rest.length} stop(s) → Farthest: ${farthest.name}`;
