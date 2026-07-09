@@ -593,6 +593,7 @@ document.getElementById('sdSmaBtn').addEventListener('click', () => {
     rnd(0.910, 0.919),
     rnd(1.020, 1.029),
     rnd(0.970, 0.979),
+    rnd(0.870, 0.879),
     rnd(0.720, 0.729),
     rnd(0.470, 0.479),
   ];
