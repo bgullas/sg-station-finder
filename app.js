@@ -386,14 +386,14 @@ function sdBuildPayload(commit) {
   const ts_r   = Math.floor(Date.now() / 1000);
 
   // sp alternates SingTel/Starhub each send when in maintenance (M), fixed SingTel when active (N)
-  let sp = 'SingTel';
+  let sp = 'ST';
   if (md === 'M' && commit) {
     const cur = sdSpToggle.get(suffix) || 0;
-    sp = cur % 2 === 0 ? 'SingTel' : 'Starhub';
+    sp = cur % 2 === 0 ? 'ST' : 'SH';
     sdSpToggle.set(suffix, cur + 1);
   } else if (md === 'M') {
     const cur = sdSpToggle.get(suffix) || 0;
-    sp = cur % 2 === 0 ? 'SingTel' : 'Starhub';
+    sp = cur % 2 === 0 ? 'ST' : 'SH';
   }
 
   const payload = {
