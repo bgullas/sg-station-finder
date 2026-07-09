@@ -456,35 +456,150 @@ document.getElementById('sdPreviewBtn').addEventListener('click', () => {
   sdShowStatus('', '');
 });
 
-// Send button
-document.getElementById('sdSendBtn').addEventListener('click', async () => {
+// Core send helper (used by button and sequences)
+async function sdDoSend() {
   const endpoint = document.getElementById('sdEndpoint').value.trim();
-  if (!endpoint) {
-    sdShowStatus('Enter a Lambda endpoint URL in Settings before sending.', 'err');
-    return;
-  }
-  const result = sdBuildPayload(true);   // commits battery drift
-  if (result.err) { sdShowStatus(result.err, 'err'); return; }
+  if (!endpoint) throw new Error('No endpoint configured');
+  const result = sdBuildPayload(true);
+  if (result.err) throw new Error(result.err);
   const { payload, topic } = result;
-
-  // Show preview too
   document.getElementById('sdJson').textContent =
     `// Topic: ${topic}\n` + JSON.stringify(payload, null, 2);
   document.getElementById('sdPreviewPanel').style.display = 'block';
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic, payload })
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return payload;
+}
 
+// Send button
+document.getElementById('sdSendBtn').addEventListener('click', async () => {
   sdShowStatus('Sending…', 'info');
   document.getElementById('sdSendBtn').disabled = true;
   try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic, payload })
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const payload = await sdDoSend();
     sdShowStatus(`Sent OK · al=${payload.al} · wl=${payload.wl}% · ${new Date().toLocaleTimeString()}`, 'ok');
   } catch (e) {
     sdShowStatus(`Send failed: ${e.message}`, 'err');
   } finally {
     document.getElementById('sdSendBtn').disabled = false;
   }
+});
+
+// ── Sequence runner ────────────────────────────────────────────
+let sdSeqCancelled = false;
+
+function rnd(min, max) {
+  return parseFloat((min + Math.random() * (max - min)).toFixed(3));
+}
+
+function sdSeqWait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function sdSeqSetMd(checked) {
+  document.getElementById('sdMd').checked = checked;
+  document.getElementById('sdMdVal').textContent = checked ? 'M' : 'N';
+}
+
+function sdSeqSetLevel(val) {
+  document.getElementById('sdLevel').value = val.toFixed(3);
+}
+
+function sdSeqShowProgress(label, step, total, levelVal) {
+  document.getElementById('sdSeqProgress').style.display = 'block';
+  document.getElementById('sdSeqLabel').textContent = `${label} — Step ${step}/${total}`;
+  document.getElementById('sdSeqBar').style.width = `${Math.round((step / total) * 100)}%`;
+  document.getElementById('sdSeqDetail').textContent = `Level: ${levelVal.toFixed(3)} m`;
+}
+
+function sdSeqHideProgress() {
+  document.getElementById('sdSeqProgress').style.display = 'none';
+  document.getElementById('sdSeqBar').style.width = '0%';
+}
+
+function sdSeqSetBusy(busy) {
+  document.getElementById('sdSendBtn').disabled   = busy;
+  document.getElementById('sdCalBtn').disabled    = busy;
+  document.getElementById('sdSmaBtn').disabled    = busy;
+  document.getElementById('sdCancelBtn').style.display = busy ? 'block' : 'none';
+}
+
+async function sdRunSequence(label, steps, mdChecked) {
+  const endpoint = document.getElementById('sdEndpoint').value.trim();
+  if (!endpoint) { sdShowStatus('No endpoint configured in Settings.', 'err'); return; }
+  const suffix = document.getElementById('sdStation').value.trim().toUpperCase();
+  if (!suffix) { sdShowStatus('Enter a station ID first.', 'err'); return; }
+
+  sdSeqCancelled = false;
+  sdSeqSetBusy(true);
+  sdSeqSetMd(mdChecked);
+
+  for (let i = 0; i < steps.length; i++) {
+    if (sdSeqCancelled) { sdShowStatus('Sequence cancelled.', 'info'); break; }
+
+    const level = steps[i];
+    sdSeqSetLevel(level);
+    sdSeqShowProgress(label, i + 1, steps.length, level);
+    sdShowStatus(`${label}: step ${i + 1}/${steps.length} — sending ${level.toFixed(3)} m…`, 'info');
+
+    try {
+      const payload = await sdDoSend();
+      sdShowStatus(`${label}: step ${i + 1}/${steps.length} sent · al=${payload.al} · ${new Date().toLocaleTimeString()}`, 'ok');
+    } catch (e) {
+      sdShowStatus(`${label}: send failed at step ${i + 1} — ${e.message}`, 'err');
+      break;
+    }
+
+    if (i < steps.length - 1 && !sdSeqCancelled) {
+      const waitSec = 6 + Math.random() * 5;
+      for (let w = 0; w < waitSec * 10; w++) {
+        if (sdSeqCancelled) break;
+        await sdSeqWait(100);
+      }
+    }
+  }
+
+  if (!sdSeqCancelled) {
+    sdSeqShowProgress(label, steps.length, steps.length, steps[steps.length - 1]);
+    sdShowStatus(`${label} complete ✓`, 'ok');
+  }
+  sdSeqSetBusy(false);
+  sdSeqHideProgress();
+}
+
+// Calibration sequence
+document.getElementById('sdCalBtn').addEventListener('click', () => {
+  const steps = [
+    0,
+    rnd(0.480, 0.520),
+    rnd(0.980, 1.020),
+    rnd(0.998, 1.003),
+    rnd(0.498, 0.503),
+    0,
+  ];
+  sdRunSequence('Calibration', steps, document.getElementById('sdMd').checked);
+});
+
+// SMA Alerts sequence (forces MD = N)
+document.getElementById('sdSmaBtn').addEventListener('click', () => {
+  const steps = [
+    rnd(0.450, 0.460),
+    rnd(0.520, 0.529),
+    rnd(0.760, 0.769),
+    rnd(0.910, 0.919),
+    rnd(1.020, 1.029),
+    rnd(0.970, 0.979),
+    rnd(0.720, 0.729),
+    rnd(0.470, 0.479),
+  ];
+  sdRunSequence('SMA Alerts', steps, false);  // MD forced to N
+});
+
+// Cancel
+document.getElementById('sdCancelBtn').addEventListener('click', () => {
+  sdSeqCancelled = true;
 });
