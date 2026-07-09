@@ -584,7 +584,7 @@ document.getElementById('sdCalBtn').addEventListener('click', () => {
   sdRunSequence('Calibration', steps, document.getElementById('sdMd').checked);
 });
 
-// SMA Alerts sequence (forces MD = N)
+// SMS Alerts sequence (forces MD = N)
 document.getElementById('sdSmaBtn').addEventListener('click', () => {
   const steps = [
     rnd(0.450, 0.460),
@@ -597,7 +597,7 @@ document.getElementById('sdSmaBtn').addEventListener('click', () => {
     rnd(0.720, 0.729),
     rnd(0.470, 0.479),
   ];
-  sdRunSequence('SMA Alerts', steps, false);  // MD forced to N
+  sdRunSequence('SMS Alerts', steps, false);  // MD forced to N
 });
 
 // Cancel
